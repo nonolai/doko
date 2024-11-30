@@ -1,0 +1,14 @@
+[package]
+name = "doko"
+version = "0.1.0"
+description = "Run methods from submodules by name"
+edition = "2021"
+repository = "https://github.com/nonolai/doko"
+
+[lib]
+proc_macro = true
+
+[dependencies]
+proc-macro2 = "1.0.49"
+quote = "1.0.23"
+syn = "1.0.107"
