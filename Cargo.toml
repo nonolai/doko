@@ -4,9 +4,11 @@ version = "0.1.0"
 description = "Run methods from submodules by name"
 edition = "2021"
 repository = "https://github.com/nonolai/doko"
+license = "MIT"
+readme = "README.md"
 
 [lib]
-proc_macro = true
+proc-macro = true
 
 [dependencies]
 proc-macro2 = "1.0.49"
