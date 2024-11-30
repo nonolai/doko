@@ -78,7 +78,18 @@ struct SubmoduleData {
 #[proc_macro]
 pub fn doko(input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as DokoArgs);
-    match tokens_for_input(input) {
+    match tokens_for_input(input, true) {
+        Ok(tokens) => tokens,
+        Err(err) => TokenStream::from(syn::Error::new(Span::call_site(), err).to_compile_error()),
+    }
+}
+
+/// Provides a function that can call some shared method in our included submodules by the modules
+/// name. Skips including the modules, to allow for calling multiple shared methods per module.
+#[proc_macro]
+pub fn doko_skip_mods(input: TokenStream) -> TokenStream {
+    let input = parse_macro_input!(input as DokoArgs);
+    match tokens_for_input(input, false) {
         Ok(tokens) => tokens,
         Err(err) => TokenStream::from(syn::Error::new(Span::call_site(), err).to_compile_error()),
     }
@@ -86,10 +97,11 @@ pub fn doko(input: TokenStream) -> TokenStream {
 
 /// Perform the heavy lifting for the macro. Does all the actual work whereas the [`doko!`] just
 /// parses input and checks the `Result` returned by this function.
-fn tokens_for_input(input: DokoArgs) -> Result<TokenStream> {
+fn tokens_for_input(input: DokoArgs, include_mods: bool) -> Result<TokenStream> {
     let enclosing_modules = get_enclosing_modules(&input.path.value())?;
     let submod_data = get_submodule_data(&input.path.value())?;
     let outer_mod = build_module_includes(&submod_data, &enclosing_modules);
+
     let registry = build_registry(
         &submod_data,
         &enclosing_modules,
@@ -97,10 +109,16 @@ fn tokens_for_input(input: DokoArgs) -> Result<TokenStream> {
         &input.signature,
     );
 
-    Ok(TokenStream::from(quote! {
-         #outer_mod
-         #registry
-    }))
+    if include_mods {
+        Ok(TokenStream::from(quote! {
+             #outer_mod
+             #registry
+        }))
+    } else {
+        Ok(TokenStream::from(quote! {
+             #registry
+        }))
+    }
 }
 
 /// For the directory being included, returns a Vec containing the identifiers of all the modules
