@@ -1,6 +1,6 @@
 [package]
 name = "doko"
-version = "0.1.0"
+version = "0.1.1"
 description = "Run methods from submodules by name"
 edition = "2021"
 repository = "https://github.com/nonolai/doko"
